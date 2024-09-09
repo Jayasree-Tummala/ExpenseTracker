@@ -1,0 +1,268 @@
+{% extends 'myapp/base.html' %}
+{% load static %}
+{% load humanize %}
+{% block body %}
+
+
+    <h1 class="m-10 font-bold ">Add Expense➕</h1>
+    <form method="POST" class="shadow-lg m-10 rounded-lg">
+        {% csrf_token %}
+        <div class="form-container px-10 py-10 flex">
+            <div class="mx-10">
+                <div class="mb-5">
+                    <label>Expense Name</label>
+                </div>
+                <div class="border">
+                    {{ expense_form.name}}
+                </div>
+            </div> 
+            
+            <div class="mx-10">
+                <div class="mb-5">
+                    <label>Amount</label>
+                </div>
+                <div class="border">
+                    {{ expense_form.amount}}
+                </div>
+            </div> 
+
+            <div class="mx-10">
+                <div class="mb-5">
+                    <label>Category</label>
+                </div>
+                <div class="border">
+                    {{ expense_form.category}}
+                </div>
+            </div> 
+            <div class="mx-10 mt-9">
+                <button type="submit" class="bg-green-500 px-5 py-2 rounded-lg">Add</button>
+            </div>
+        </div>
+        
+    </form>
+    <div class="m-10 font-bold">Expenses 💸</div>
+    <div class="shadow-lg m-10 rounded-lg">
+        <div class="expense-header flex flex-wrap space-x-40 ">
+            <span>Name</span>
+            <span>Amount</span>
+            <span>Category</span>
+            <span>Date of purchase</span>
+            <span></span>
+            <span></span>
+
+        </div>
+        <hr class="m-10">
+        {% for expense in expenses %}
+        <div class="expense-row flex flex-wrap px-15 py-5">
+            <span class="font-bold">{{expense.name}}</span>
+            <span class="font-bold">Rs.{{expense.amount | intcomma }}</span>
+            <span class="font-bold">{{expense.category}}</span>
+            <span class="font-bold">{{expense.date}}</span>
+            <span class="font-bold"><a href="{% url 'edit' expense.id %}" class="bg-indigo-500 px-5 py-2 rounded-lg text-white">Edit</a></span>
+            <span class="font-bold">
+                <form method="post" action="{% url 'delete' expense.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="bg-indigo-500 px-5 py-2 rounded-lg text-white font-bold" name="delete">
+                        Delete
+                    </button>
+                </form>
+            </span>
+            
+        </div>
+        {% endfor %}  
+        <!--Displaying The total-->
+        
+        
+    </div>
+    <div class="items-center justify-center  m-10 h-30 w-45 shadow-lg rounded flex text-green-800 bg-slate-700 ">
+        <span class="font-bold ">💰your total expendicture is </span>
+        <span class="font-bold m-0.5">
+            Rs. {{ total_expenses.amount__sum | intcomma }}
+        </span>
+    </div>
+
+     <div class="flex">
+        <div class="w-1/3 shadow-lg ml-10 rounded">
+            <h1 class="ml-10 font-bold text-gray-500">LAST 365 DAYS</h1>
+            <h1 class="ml-10 my-5 text-2xl text-green-500 font-bold">
+               Rs. {{ yearly_sum.amount__sum | intcomma}}
+            </h1>
+           
+            
+           
+        </div>
+        <div class="w-1/3 shadow-lg ml-10 rounded">
+            <h1 class="ml-10 font-bold text-gray-500">LAST 30  DAYS</h1>
+            <h1 class="ml-10 my-5 text-2xl text-green-500 font-bold">
+               Rs. {{ monthly_sum.amount__sum | intcomma}}
+            </h1>
+        </div>
+
+        <div class="w-1/3 shadow-lg ml-10 rounded">
+            <h1 class="ml-10 font-bold text-gray-500">LAST 7  DAYS</h1>
+            <h1 class="ml-10 my-5 text-2xl text-green-500 font-bold">
+               Rs. {{ weekly_sum.amount__sum | intcomma}}
+            </h1>
+        </div>
+
+     </div>
+
+     <div class="flex">
+        <div class="w-1/2 shadow-lg m-10">
+            <div class="flex flex-wrap space-x-40 font-bold px-20 py-5">
+                <span>Past 30 days Expenses</span>
+            </div>
+            <hr>
+            <div id="monthly-day-table" class="flex">
+                {% for daily in daily_sum %}
+                <div class="daily-row flex">
+                    <div class="px-20 py-5">
+                        <span>{{ daily.date }}</span>
+                    </div>
+                    <div class="px-20 py-5">
+                        <span class="text-green-500">Rs. {{ daily.sum }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="w-1/2 shadow-lg m-10">
+            <div>
+                <div class=" space-x-30 font-bold px-20 py-5">
+                    <span>Categorical Expenses</span>
+                </div>
+                <hr>
+                
+                    {% for cat in category_sum %}
+                    <div id="cat-sum-table" class="flex">
+                    <div class=" px-20 py-5">
+                        <span>
+                            {{cat.category}}
+                        </span>
+                    </div>
+                    <div class=" px-20 py-5 ">
+                        <span class="text-green-500">
+                            Rs.{{cat.sum}}
+                        </span>
+                    </div>
+                </div>
+                    {% endfor %}
+                
+            </div>
+            
+        </div>
+     </div>
+     <div class="flex">
+        <div class="w-1/2 shadow-lg ml-10">
+            <h1>Expense spread acros categories</h1>
+            <canvas id="myChart" class="m-10"></canvas>
+        </div>
+        <div class="w-1/2 shadow-lg ml-10">
+            <h1>Monthly Expenses</h1>
+            <canvas id="myChart1" class="m-10"></canvas>
+        </div>
+     </div>
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.0.2/chart.min.js" integrity="sha512-dnUg2JxjlVoXHVdSMWDYm2Y5xcIrJg1N+juOuRi0yLVkku/g26rwHwysJDAMwahaDfRpr1AxFz43ktuMPr/l1A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+     <script>
+        const ctx = document.getElementById('myChart');
+        const cats=[]
+        const cat_sums =[]
+        const catSumDiv = document.querySelectorAll('#cat-sum-table .px-20.py-5');
+        for (let i = 0; i < catSumDiv.length; i++) {
+    if (i % 2 === 0) {  // Categories should be in the even indices
+        let categoryText = catSumDiv[i].innerText.trim();
+        console.log(`Category: "${categoryText}"`);  // Log category text
+        cats.push(categoryText);
+    } else {  // Amounts should be in the odd indices
+        let amountText = catSumDiv[i].innerText.replace(/Rs\.\s*/g, "").trim();
+        console.log(`Amount: "${amountText}"`);  // Log amount text after replacing
+        cat_sums.push(parseInt(amountText));
+    }
+}
+       console.log(cat_sums)
+       //console.log(catSumDiv)
+new Chart(ctx, {
+  type: 'bar',
+  data: {
+    labels: cats,
+    datasets: [{
+      label: 'Categorical Expenses',
+      backgroundColor : [
+        'rgba(255,99,132,0.2)',
+        'rgba(54, 162, 235,0.2)',
+        'rgba(255,20,6,86,0.2)',
+        'rgba(75, 192, 192, 0.2)',
+        'rgba(153, 10.2, 255, 0.2)',
+        'rgba(255, 159,64,0.2)',
+      ],
+      data: cat_sums,
+      borderWidth: 1
+    }]
+  },
+  options: {
+    scales: {
+      y: {
+        beginAtZero: true
+      }
+    }
+  }
+});
+
+
+const dailySumDiv = document.querySelectorAll('#monthly-day-table .px-20.py-5');
+const dates = [];
+const sums = [];
+console.log(dailySumDiv)
+
+for(let i=0;i<dailySumDiv.length;i++)
+{
+    if(i%2==0)
+{
+    console.log(dailySumDiv[i].innerText)
+    dates.push(dailySumDiv[i].innerText)
+}
+else{
+    sums.push(parseInt(dailySumDiv[i].innerText.replace("Rs. ","")))
+}
+}
+
+console.log(dates)
+console.log(sums)
+const ctx1 = document.getElementById('myChart1').getContext('2d');
+
+new Chart(ctx1, {
+    type: 'line',  // Changed to 'line' for better visualization of monthly expenses
+    data: {
+        labels: dates,
+        datasets: [{
+            label: 'Daily Expenses',
+            backgroundColor: 'rgba(54, 162, 235,0.2)',
+            borderColor: 'rgba(54, 162, 235,1)',
+            fill: false,
+            data: sums, // Use sums array directly for line chart
+            borderWidth: 2
+        }]
+    },
+    options: {
+        scales: {
+            y: {
+                beginAtZero: true,
+                title: {
+                    display: true,
+                    text: 'Expenses (Rs.)'
+                }
+            },
+            x: {
+                title: {
+                    display: true,
+                    text: 'Date'
+                }
+            }
+        }
+    }
+    
+});
+
+
+     </script>
+{% endblock %}

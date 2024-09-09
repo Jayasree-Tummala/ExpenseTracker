@@ -1,0 +1,26 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'myapp\styles.css' %}">
+    <link rel="stylesheet" href="{% static 'myapp/style.css'%}">
+    
+</head>
+<body>
+    <div class="shadow-lg">
+        <div class="containder flex flex-wrap justify-between items-center mx-auto">
+            <a href="#" class="flex m-10" >
+                <img src="{% static 'myapp/images/image.png' %}" class="w-10 h-10">
+                <span class="font-bold h-10 text-xl m-2 ">Expense Tracker</span>
+            </a>
+        </div>
+    </div>
+    {% block body %}
+    {% endblock %}
+    
+</body>
+
+</html>
